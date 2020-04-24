@@ -46,7 +46,9 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -161,6 +163,7 @@ public class AnalyzeCommand implements Callable<Integer> {
 
     Path configurationPath = LanguageServerConfiguration.getCustomConfigurationRoot(configuration, srcDir);
     context = new ServerContext(configurationPath);
+    context.getConfiguration();
     DiagnosticSupplier diagnosticSupplier = new DiagnosticSupplier(configuration);
     diagnosticProvider = new DiagnosticProvider(diagnosticSupplier);
 
@@ -183,6 +186,12 @@ public class AnalyzeCommand implements Callable<Integer> {
           .collect(Collectors.toList());
       }
     }
+
+    diagnosticProvider.measures.entrySet().stream()
+      .map(entry -> Map.entry(entry.getKey(), entry.getValue().stream().mapToLong(value -> value).sum()))
+      .sorted(Comparator.comparingLong(Map.Entry::getValue))
+      .map(entry -> String.format("%s - %d", entry.getKey(), entry.getValue()))
+      .forEach(System.out::println);
 
     AnalysisInfo analysisInfo = new AnalysisInfo(LocalDateTime.now(), fileInfos, srcDir.toString());
     Path outputDir = Absolute.path(outputDirOption);
