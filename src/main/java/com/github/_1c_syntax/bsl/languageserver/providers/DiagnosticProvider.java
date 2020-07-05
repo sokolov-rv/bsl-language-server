@@ -72,9 +72,20 @@ public final class DiagnosticProvider {
   }
 
   public List<Diagnostic> computeDiagnostics(DocumentContext documentContext) {
+    long startDI = System.currentTimeMillis();
     DiagnosticIgnoranceComputer.Data diagnosticIgnorance = documentContext.getDiagnosticIgnorance();
+    long endDI = System.currentTimeMillis();
+    measures.computeIfAbsent("diagnosticIgnorance", s -> new CopyOnWriteArrayList<>()).add(endDI - startDI);
+
+    long startST = System.currentTimeMillis();
     documentContext.getSymbolTree();
+    long endST = System.currentTimeMillis();
+    measures.computeIfAbsent("symbolTree", s -> new CopyOnWriteArrayList<>()).add(endST - startST);
+
+    long startM = System.currentTimeMillis();
     documentContext.getMetrics();
+    long endM = System.currentTimeMillis();
+    measures.computeIfAbsent("metrics", s -> new CopyOnWriteArrayList<>()).add(endM - startM);
 
     List<Diagnostic> diagnostics =
       diagnosticSupplier.getDiagnosticInstances(documentContext).parallelStream()
