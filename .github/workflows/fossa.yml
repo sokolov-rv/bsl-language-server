@@ -1,0 +1,35 @@
+name: Dependency License Scanning
+
+on:
+  push:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  fossa:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: Fossa init
+      run: |- 
+        curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install.sh | bash
+        fossa init
+        echo ::set-env name=line_number::$(grep -n "project" .fossa.yml | cut -f1 -d:)
+    - name: Configuration
+      run: |-
+       sed -i "${line_number}s|.*|  project: github.com/${GITHUB_REPOSITORY}|" .fossa.yml
+    - name: View config file
+      run: cat .fossa.yml
+    - name: Compile
+      run: ./gradlew compileJava compileTestJava
+    - name: Upload dependencies
+      run: fossa analyze --debug
+      env:
+        FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
