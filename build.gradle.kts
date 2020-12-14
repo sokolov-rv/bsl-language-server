@@ -15,7 +15,7 @@ plugins {
     id("me.qoomon.git-versioning") version "3.0.0"
     id("com.github.ben-manes.versions") version "0.36.0"
     id("io.freefair.javadoc-links") version "5.2.1"
-    id("org.springframework.boot") version "2.4.1"
+    id("org.springframework.boot") version "2.3.5.RELEASE"
     id("com.github.1c-syntax.bslls-dev-tools") version "0.3.3"
 }
 

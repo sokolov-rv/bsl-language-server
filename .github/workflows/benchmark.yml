@@ -5,6 +5,7 @@ on:
     branches:
       - develop
       - master
+      - feature/lsp4j-0.10.0-check
     paths:
     - 'src/**'
     - '.github/workflows/benchmark.yml'
