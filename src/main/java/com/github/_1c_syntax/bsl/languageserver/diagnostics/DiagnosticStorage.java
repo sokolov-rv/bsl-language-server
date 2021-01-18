@@ -21,12 +21,15 @@
  */
 package com.github._1c_syntax.bsl.languageserver.diagnostics;
 
+import com.github._1c_syntax.bsl.languageserver.configuration.Language;
+import com.github._1c_syntax.bsl.languageserver.diagnostics.metadata.DiagnosticCode;
 import com.github._1c_syntax.bsl.languageserver.utils.Ranges;
 import com.github._1c_syntax.bsl.parser.BSLParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticCodeDescription;
 import org.eclipse.lsp4j.DiagnosticRelatedInformation;
 import org.eclipse.lsp4j.Range;
 
@@ -227,9 +230,36 @@ public class DiagnosticStorage {
     diagnostic.setCode(bslDiagnostic.getInfo().getCode());
     diagnostic.setTags(bslDiagnostic.getInfo().getLSPTags());
 
+    var href = getDiagnosticDescriptionHref(bslDiagnostic.getInfo().getCode());
+    var codeDescription = new DiagnosticCodeDescription(href);
+    diagnostic.setCodeDescription(codeDescription);
+
     if (relatedInformation != null) {
       diagnostic.setRelatedInformation(relatedInformation);
     }
     return diagnostic;
+  }
+
+  private static String getDiagnosticDescriptionHref(DiagnosticCode code) {
+
+//    var linkOptions = configuration.getDocumentLinkOptions();
+//    var language = configuration.getLanguage();
+//    boolean useDevSite = linkOptions.isUseDevSite();
+    var language = Language.RU;
+    boolean useDevSite = false;
+
+//    var siteRoot = linkOptions.getSiteRoot();
+    var siteRoot = "https://1c-syntax.github.io/bsl-language-server";
+    var devSuffix = useDevSite ? "/dev" : "";
+    var languageSuffix = language == Language.EN ? "/en" : "";
+
+    var siteDiagnosticsUrl = String.format(
+      "%s%s%s/diagnostics/",
+      siteRoot,
+      devSuffix,
+      languageSuffix
+    );
+
+    return siteDiagnosticsUrl + code.getStringValue();
   }
 }
